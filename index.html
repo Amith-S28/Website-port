@@ -1,0 +1,471 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amith Sirisilla - Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #000; /* Fallback color */
+      background-image: url("C:\Users\amith\Downloads\whiteabs.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed; /* Optional: Keeps image fixed during scroll */
+      font-family: 'Montserrat', sans-serif;
+      scroll-behavior: smooth;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .hero-text, .hero-text h1, .hero-text p {
+      color: #8b5cf6; /* Purple for Hero section */
+    }
+    .projects-text, .projects-text h2, .projects-text h3, .projects-text p, .projects-text a {
+      color: #c4b5fd; /* Neon yellow for Projects section */
+    }
+    .achievements-text, .achievements-text h2, .achievements-text h3, .achievements-text p {
+      color: #c4b5fd; /* Deep teal for Achievements section */
+    }
+    .achievements-text .text-facc15 {
+      color: #facc15; /* Preserve neon yellow for specific elements */
+    }
+    .education-text, .education-text h2, .education-text h3, .education-text p {
+      color: #c4b5fd; /* Light purple for Education section */
+    }
+    .education-text .text-facc15 {
+      color: #facc15; /* Preserve neon yellow for specific elements */
+    }
+    .certifications-text, .certifications-text h2, .certifications-text h3, .certifications-text p {
+      color: #c4b5fd; /* Bright cyan for Certifications section */
+    }
+    .certifications-text .text-facc15 {
+      color: #facc15; /* Preserve neon yellow for specific elements */
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #ffcc00;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: float 10s infinite;
+    }
+    .particle.purple {
+      background: #8b5cf6;
+    }
+    @keyframes float {
+      0% { transform: translateY(0); opacity: 0.5; }
+      50% { opacity: 0.8; }
+      100% { transform: translateY(-100vh); opacity: 0; }
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .slide-in-left {
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+    .slide-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .slide-in-right {
+      opacity: 0;
+      transform: translateX(50px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+    .slide-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .scale-in {
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .scale-in.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .abstract-card {
+      position: relative;
+      background: linear-gradient(45deg, #000000, #000000);
+      border: 2px solid transparent;
+      border-image: linear-gradient(45deg, #8b5cf6, #facc15) 1;
+      transform: perspective(1000px) rotateY(0deg);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+    .abstract-card:hover {
+      transform: perspective(1000px) rotateY(5deg) translateY(-10px);
+      box-shadow: 0 12px 40px rgba(139, 92, 246, 0.8);
+      border-color: #facc15;
+      animation: pulse-glow 1.5s infinite;
+    }
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 12px 40px rgba(139, 92, 246, 0.8); }
+      50% { box-shadow: 0 12px 50px rgba(139, 92, 246, 1); }
+      100% { box-shadow: 0 12px 40px rgba(139, 92, 246, 0.8); }
+    }
+    .abstract-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 204, 0, 0.3), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .abstract-card:hover::before {
+      opacity: 1;
+    }
+    .abstract-card-content {
+      padding: 1.5rem;
+      text-align: center;
+      transform: translateZ(20px);
+    }
+    .tech-logo {
+      width: 40px;
+      height: 40px;
+      margin-top: 0.5rem;
+      filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.5));
+    }
+    .gradient-button {
+      background: linear-gradient(45deg, #453d50, #453d50);
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+    }
+    .gradient-button:hover {
+      background: linear-gradient(45deg, #686868, #686868);
+      color: #000000;
+      transform: scale(1.05);
+    }
+    .gradient-button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+    .gradient-button:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0.8;
+      color: #8b5cf6;
+    }
+    .nav-link:hover {
+      color: #facc15;
+      transform: scale(1.1);
+      opacity: 1;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(45deg, #8b5cf6, #facc15);
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-text {
+      animation: slideIn 1s ease-out;
+    }
+    section {
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), #000000);
+      position: relative;
+      padding: 5rem 1rem;
+    }
+    section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #8b5cf6, #facc15);
+    }
+    h1, h2, h3 {
+      font-family: 'Poppins', sans-serif;
+    }
+    .card {
+      background: linear-gradient(45deg, #000000, #000000);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid #8b5cf6;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+    }
+    .sticker {
+      width: 60px;
+      height: 60px;
+      opacity: 0.9;
+      filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.5));
+    }
+    footer p {
+      color: #0d9488;
+    }
+    footer a:hover {
+      color: #facc15;
+    }
+
+    .profile-photo {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .profile-photo:hover {
+      transform: scale(1.05) rotate(2deg); /* Subtle zoom and tilt */
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); /* Purple glow */
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Particles -->
+  <div id="particles" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 w-full bg-black bg-opacity-90 z-10 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-8b5cf6">Amith Sirisilla</div>
+      <div class="space-x-4">
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#achievements" class="nav-link">Achievements</a>
+        <a href="#education" class="nav-link">Education</a>
+        <a href="#certifications" class="nav-link">Certifications</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="h-screen flex items-center justify-center relative hero-text">
+    <div class="text-center">
+      <img src="C:\Users\amith\OneDrive\Documents\Me.jpg" alt="Profile Photo" class="profile-photo rounded-full mx-auto mb-4 border-4 border-8b5cf6 shadow-lg" style="width: 250px; height: 250px; object-fit: cover;">
+      <h1 class="text-5xl font-bold mb-4">Amith Sirisilla Jayadevgari</h1>
+      <p class="text-xl mb-6" style="color: #facc15;">Computer Science & Engineering Student | AI & Game Development Enthusiast</p>
+      <div class="flex justify-center space-x-4">
+        <a href="mailto:amithsirisilla28@gmail.com" class="gradient-button px-4 py-2 rounded" style="color: #33ff00;">Email</a>
+        <a href="https://linkedin.com/in/amith-sirisilla-7b4850240/" target="_blank" class="gradient-button px-4 py-2 rounded" style="color: #33ff00;">LinkedIn</a>
+        <a href="https://github.com/Amith-S28" target="_blank" class="gradient-button px-4 py-2 rounded" style="color: #33ff00;">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects" class="py-20 max-w-6xl mx-auto px-4 projects-text">
+    <h2 class="text-4xl font-bold mb-8 text-center scale-in">Projects</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <a href="project1.html" class="abstract-card slide-in-left">
+        <div class="abstract-card-content">
+          <h3 class="text-2xl font-semibold">AI-Powered Crop Quality Analysis</h3>
+          <img src="https://img.icons8.com/color/48/000000/python.png" alt="Python Logo" class="tech-logo" />
+          <!-- Source: Icons8 (https://icons8.com/icon/13441/python) -->
+        </div>
+      </a>
+      <a href="project2.html" class="abstract-card slide-in-right">
+        <div class="abstract-card-content">
+          <h3 class="text-2xl font-semibold">Text-based AI Adventure Game</h3>
+          <img src="https://img.icons8.com/color/48/000000/python.png" alt="Python Logo" class="tech-logo" />
+          <!-- Source: Icons8 (https://icons8.com/icon/13441/python) -->
+        </div>
+      </a>
+      <a href="project3.html" class="abstract-card slide-in-left">
+        <div class="abstract-card-content">
+          <h3 class="text-2xl font-semibold">Dynamic Price Allocator</h3>
+          <img src="https://img.icons8.com/color/48/000000/python.png" alt="Python Logo" class="tech-logo" />
+          <!-- Source: Icons8 (https://icons8.com/icon/13441/python) -->
+        </div>
+      </a>
+      <a href="project4.html" class="abstract-card slide-in-right">
+        <div class="abstract-card-content">
+          <h3 class="text-2xl font-semibold">Project O1</h3>
+          <img src="https://img.icons8.com/color/48/000000/unreal-engine.png" alt="Unreal Engine Logo" class="tech-logo" />
+          <!-- Source: Icons8 (https://icons8.com/icon/13679/unreal-engine) -->
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Achievements Section -->
+  <section id="achievements" class="py-20 max-w-6xl mx-auto px-4 achievements-text">
+    <h2 class="text-4xl font-bold mb-8 text-center scale-in">Achievements</h2>
+    <div class="space-y-6">
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">National Astronomy & Science Olympiad (NASO)</h3>
+        <p class="text-sm text-facc15">March 2018</p>
+        <p>School level Gold Medalist & Top 1200 Nationwide.</p>
+      </div>
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">Social Work</h3>
+        <p class="text-sm text-facc15">July 2023</p>
+        <p>Worked for Children Rights and Betterment through MV Foundation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Education Section -->
+  <section id="education" class="py-20 max-w-6xl mx-auto px-4 education-text">
+    <h2 class="text-4xl font-bold mb-8 text-center scale-in">Education</h2>
+    <div class="space-y-6">
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">Lovely Professional University, Punjab, India</h3>
+        <p class="text-facc15">Bachelor of Technology - Computer Science and Engineering</p>
+        <p class="text-sm">August 2022 – Present</p>
+        <p class="text-sm">CGPA: 6.34</p>
+        <p class="text-sm"><strong>Courses:</strong> Object Oriented Programming, Data Structures, Machine Learning, Game Tools</p>
+      </div>
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">Narayana Junior College, Hyderabad, Telangana</h3>
+        <p class="text-facc15">Intermediate</p>
+        <p class="text-sm">April 2020 – March 2022</p>
+        <p class="text-sm">Percentage: 88.4%</p>
+        <p class="text-sm"><strong>Courses:</strong> Physics, Chemistry, Mathematics</p>
+      </div>
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">Narayana Highschool, Hyderabad, Telangana</h3>
+        <p class="text-facc15">Matriculation</p>
+        <p class="text-sm">April 2019 – March 2020</p>
+        <p class="text-sm">CGPA: 10</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certifications Section -->
+  <section id="certifications" class="py-20 max-w-6xl mx-auto px-4 certifications-text">
+    <h2 class="text-4xl font-bold mb-8 text-center scale-in">Certifications</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">AI Accountability: Build Responsible and Transparent Systems</h3>
+        <p class="text-sm text-facc15">Coursera</p>
+        <p class="text-sm">February 2023</p>
+      </div>
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">NLP with Python for Machine Learning Essential Training</h3>
+        <p class="text-sm text-facc15">LinkedIn</p>
+        <p class="text-sm">February 2023</p>
+      </div>
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">AI Algorithms for Gaming</h3>
+        <p class="text-sm text-facc15">LinkedIn</p>
+        <p class="text-sm">December 2024</p>
+      </div>
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">Artificial Intelligence Foundations: Thinking Machines</h3>
+        <p class="text-sm text-facc15">Coursera</p>
+        <p class="text-sm">November 2023</p>
+      </div>
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">Cloud Computing</h3>
+        <p class="text-sm text-facc15">NPTEL</p>
+        <p class="text-sm">June 2024</p>
+      </div>
+      <div class="card p-4 rounded-lg fade-in">
+        <h3 class="text-xl font-semibold">Machine Learning</h3>
+        <p class="text-sm text-facc15">IBM</p>
+        <p class="text-sm">January 2025</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-6 text-center bg-black relative">
+    <p>Contact: <a href="mailto:amithsirisilla28@gmail.com" class="hover:text-facc15 transition-colors duration-300">amithsirisilla28@gmail.com</a> | +91 8688943880</p>
+    <p class="mt-2">© 2025 Amith Sirisilla. All rights reserved.</p>
+    <img src="https://img.icons8.com/fluency/96/000000/code.png" alt="Code Sticker" class="sticker absolute top-4 right-4" />
+    <!-- Source: Icons8 (https://icons8.com/icon/8zXv0i5t1p7P/code) -->
+  </footer>
+
+  <script>
+    // Add visibility classes when elements come into view
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right, .scale-in').forEach(element => {
+      observer.observe(element);
+    });
+
+    // Particle animation
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 20; i++) {
+      const particle = document.createElement('div');
+      particle.className = `particle ${i % 2 === 0 ? 'purple' : ''}`;
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.animationDelay = `${Math.random() * 10}s`;
+      particlesContainer.appendChild(particle);
+    }
+  </script>
+</body>
+</html>
